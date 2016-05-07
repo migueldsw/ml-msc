@@ -11,7 +11,7 @@ def normalize_columns(data):
             denominador = maximo - minimo
             normazu = (data[:,col] - minimo) / denominador
             data[:,col] = normazu # [max,min] -> [0,1]
-            #data[:,col] = (normazu*2) - 1 # [max,min] -> [0,1]
+            #data[:,col] = (normazu*2) - 1 # [max,min] -> [-1,1]
         else:
             data[:,col] = 0 #column 'col' - numpyarray notation
 
