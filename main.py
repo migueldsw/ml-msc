@@ -49,7 +49,7 @@ def getInitialVectorOfMedoidsVector(E,K):
 		while (randIndex in vlist):
 			randIndex = rd.randint(0,len(E)-1)
 		vlist.append(randIndex)
-		print randIndex, yfac[randIndex]
+		#print randIndex, yfac[randIndex]
 		g_k = E[randIndex]
 		G.append([g_k])
 	return np.array(G)
@@ -71,22 +71,30 @@ def getInitialVectorOfMembershipDegreeVectors(E,K): #eq. (6)
 		for k in range(K):
 			argSum = 0
 			for h in range(K):
-				argSum += (( LAMBDA[k][0] * dist(E[i], G[k][0] ) )/(  LAMBDA[h][0] * dist(E[i], G[h][0] ) + 1e-25 ))
+				upperVal = 0
+				lowerVal = 0 
+				for j in range(p):
+					upperVal += LAMBDA[k][j] * dist(E[i],G[k][j])
+				for j in range(p):
+					lowerVal+= LAMBDA[h][j] * dist(E[i],G[h][j])
+
+				argSum += ( upperVal /(lowerVal + 1e-25 ))
 			u_i_k = ( argSum ** (1./(m-1.)) ) ** -1.
 			u_i.append(u_i_k)
 		U.append(u_i)
 	return np.array(U)
+getu = getInitialVectorOfMembershipDegreeVectors #alias
 
 #------ MVFCMddV init
-def MVFCMddV_init():
-	E = xfou
-	K = 10
-	m = 1.6
-	p = 1
-	D1 = dissimilarityMatrix(E,dist)
-	G = getInitialVectorOfMedoidsVector(E,K)
-	LAMBDA = getInitialVectorOfRelevanceWeightVectors(K)
-	U = getInitialVectorOfMembershipDegreeVectors(E,K)
+#def MVFCMddV_init():
+E = xfou
+K = 10
+m = 1.6
+p = 1
+D1 = dissimilarityMatrix(E,dist)
+G = getInitialVectorOfMedoidsVector(E,K)
+LAMBDA = getInitialVectorOfRelevanceWeightVectors(K)
+U = getInitialVectorOfMembershipDegreeVectors(E,K)
 #--------------------------------------
 
 def checkdata():
