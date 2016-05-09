@@ -43,9 +43,13 @@ vmat = verifyMatrix #alias
 #------ MVFCMddV implementation-------
 def getInitialVectorOfMedoidsVector(E,K):
 	G=[]
+	vlist = []
 	for k in range(K):
 		randIndex = rd.randint(0,len(E)-1)
-		#print yfac[randIndex]
+		while (randIndex in vlist):
+			randIndex = rd.randint(0,len(E)-1)
+		vlist.append(randIndex)
+		print randIndex, yfac[randIndex]
 		g_k = E[randIndex]
 		G.append([g_k])
 	return np.array(G)
@@ -74,14 +78,15 @@ def getInitialVectorOfMembershipDegreeVectors(E,K): #eq. (6)
 	return np.array(U)
 
 #------ MVFCMddV init
-E = xfou
-K = 10
-m = 1.6
-p = 1
-D1 = dissimilarityMatrix(E,dist)
-G = getInitialVectorOfMedoidsVector(E,K)
-LAMBDA = getInitialVectorOfRelevanceWeightVectors(K)
-U = getInitialVectorOfMembershipDegreeVectors(E,K)
+def MVFCMddV_init():
+	E = xfou
+	K = 10
+	m = 1.6
+	p = 1
+	D1 = dissimilarityMatrix(E,dist)
+	G = getInitialVectorOfMedoidsVector(E,K)
+	LAMBDA = getInitialVectorOfRelevanceWeightVectors(K)
+	U = getInitialVectorOfMembershipDegreeVectors(E,K)
 #--------------------------------------
 
 def checkdata():
