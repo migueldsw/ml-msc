@@ -88,6 +88,17 @@ def getInitialVectorOfMembershipDegreeVectors(E,K): #eq. (6)
 	return np.array(U)
 getu = getInitialVectorOfMembershipDegreeVectors #alias
 
+def J(G,L,U,K): #eq. (1) -> objective function
+	n = len(U)
+	val = 0
+	for k in range(K):
+		for i in range(n):
+			summ = 0
+			for j in range(p):
+				summ += L[k][j] * D1[i][G[k][j]]
+			val += (U[i][k] ** m) * summ
+	return val
+
 def step1(E,K,G,L,U): #search for the best medoid vectors -> returns G (updates cluster medoids vector)
 	nG=[] #new G -> G(t) updated
 	n = len(E)
@@ -124,6 +135,7 @@ def argminIndex(list):
 
 #------ MVFCMddV init
 #def MVFCMddV_init():
+#INIT----
 E = xsmall
 K = 3 #10
 m = 1.6
@@ -132,11 +144,9 @@ D1 = dissimilarityMatrix(E,dist)
 G = getInitialVectorOfMedoidsVector(E,K)
 L = getInitialVectorOfRelevanceWeightVectors(K)
 U = getInitialVectorOfMembershipDegreeVectors(E,K)
-
+#REPEAT----
 nG = step1(E,K,G,L,U)
 
-print G
-print nG
 
 
 
