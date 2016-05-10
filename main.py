@@ -11,6 +11,7 @@ DATASETNAMES = ['fac','fou','kar','mor','pix','zer']
 xfac,yfac = DATA["fac"]
 xfou,yfou = DATA["fou"]
 xkar,ykar = DATA["kar"]
+xsmall,ysmall = DATA["small"]
 
 toy = np.array([[1,0,0],[0,1,0],[0,0,0]]) #toy dataset, just for test and validation
 
@@ -50,17 +51,18 @@ def getInitialVectorOfMedoidsVector(E,K):
 			randIndex = rd.randint(0,len(E)-1)
 		vlist.append(randIndex)
 		#print randIndex, yfac[randIndex]
-		g_k = E[randIndex]
+#>>		g_k = E[randIndex] #G <- instance
+		g_k = randIndex # G <- instance's index
 		G.append([g_k])
 	return np.array(G)
 vmv = getInitialVectorOfMedoidsVector #alias
 
 def getInitialVectorOfRelevanceWeightVectors(K):
-	LAMBDA = []
+	L = []
 	for k in range(K):
-		lambda_k = [1]
-		LAMBDA.append(lambda_k)
-	return np.array(LAMBDA)
+		L_k = [1]
+		L.append(L_k)
+	return np.array(L)
 gbgl = getInitialVectorOfRelevanceWeightVectors #alias
 
 def getInitialVectorOfMembershipDegreeVectors(E,K): #eq. (6)
@@ -71,30 +73,73 @@ def getInitialVectorOfMembershipDegreeVectors(E,K): #eq. (6)
 		for k in range(K):
 			argSum = 0
 			for h in range(K):
-				upperVal = 0
-				lowerVal = 0 
+				numerator = 0
+				denominator = 0 
 				for j in range(p):
-					upperVal += LAMBDA[k][j] * dist(E[i],G[k][j])
+#					numerator += L[k][j] * dist(E[i],G[k][j])
+					numerator += L[k][j] * D1[i][G[k][j]]
 				for j in range(p):
-					lowerVal+= LAMBDA[h][j] * dist(E[i],G[h][j])
-
-				argSum += ( upperVal /(lowerVal + 1e-25 ))
-			u_i_k = ( argSum ** (1./(m-1.)) ) ** -1.
+#					denominator+= L[h][j] * dist(E[i],G[h][j])
+					denominator+= L[h][j] * D1[i][G[h][j]]
+				argSum += ( numerator /(denominator + 1e-25 ))
+			u_i_k = (( argSum ** (1./(m-1.)) ) + 1e-25  ) ** -1.
 			u_i.append(u_i_k)
 		U.append(u_i)
 	return np.array(U)
 getu = getInitialVectorOfMembershipDegreeVectors #alias
 
+def step1(E,K,G,L,U): #search for the best medoid vectors -> returns G (updates cluster medoids vector)
+	nG=[] #new G -> G(t) updated
+	n = len(E)
+	for k in range(K):
+		arglist = []
+		for h in range (n):
+			summ = 0
+			for i in range (n):
+				summ += ((U[i][k] ** m) * (D1[i][h]))
+			arglist.append(summ)
+		l = argminIndex(arglist)
+		nG.append([l])
+	return np.array(nG)
+
+def Ut0(K,n,):
+	U = []
+	for i in range (n):
+		u_i = []
+		for k in range(K):
+			u_i_k = 1./K 
+			u_i.append(u_i_k)
+		U.append(u_i)
+	return np.array(U)
+
+def argminIndex(list):
+	argmin = min(list)
+	index = []
+	for i in range(len(list)):
+		if (list[i] == argmin) :
+			index = i
+	return index
+
+
+
 #------ MVFCMddV init
 #def MVFCMddV_init():
-E = xfou
-K = 10
+E = xsmall
+K = 3 #10
 m = 1.6
 p = 1
 D1 = dissimilarityMatrix(E,dist)
 G = getInitialVectorOfMedoidsVector(E,K)
-LAMBDA = getInitialVectorOfRelevanceWeightVectors(K)
+L = getInitialVectorOfRelevanceWeightVectors(K)
 U = getInitialVectorOfMembershipDegreeVectors(E,K)
+
+nG = step1(E,K,G,L,U)
+
+print G
+print nG
+
+
+
 #--------------------------------------
 
 def checkdata():
