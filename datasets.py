@@ -50,6 +50,7 @@ target = generateTargetsArray()
 #small data set: 30 instances -> 3 first classes, 10 instances of each class 
 small_mor = np.concatenate([mor[0:10],mor[200:210],mor[400:410]])
 small_fou = np.concatenate([fou[0:10],fou[200:210],fou[400:410]])
+small_fac = np.concatenate([fac[0:10],fac[200:210],fac[400:410]])
 small_target = np.concatenate([target[0:10],target[200:210],target[400:410]])
 
 #DATASETS: "(x,y)" like, where x = features vector(np.array) and y = targets(classes). 
@@ -62,6 +63,7 @@ DATA = {
     'pix': (pix,target),
     'zer': (zer,target),
     'small': (small_mor,small_target),
-    'small2': (small_fou,small_target)
+    'small2': (small_fou,small_target),
+    'small3': (small_fac,small_target)
     }
 

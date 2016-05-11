@@ -8,23 +8,12 @@ dist = sc.spatial.distance.euclidean #set global function 'dist' as the euclidea
 
 DATASETNAMES = ['fac','fou','kar','mor','pix','zer']
 
-xfac,yfac = DATA["fac"]
-xfou,yfou = DATA["fou"]
-xkar,ykar = DATA["kar"]
-xsmall,ysmall = DATA["small"]
-xsmall2,ysmall2 = DATA["small2"]
-
-
-toy = np.array([[1,0,0],[0,1,0],[0,0,0]]) #toy dataset, just for test and validation
-
-print "Multiple Features Data Set loaded..."
-
 def datasetdetails(dataset,name):
 	#print "%s -> instances: %d | dimensions: %d | max/min frst column: %f / %f"%(name,len(dataset), len(dataset[0]), max(dataset[:,0]),min(dataset[:,0]))
 	print "%s -> instances: %d | dimensions: %d "%(name,len(dataset), len(dataset[0]))
 
 def dissimilarityMatrix(dataset,dist): # returns the : D(nxn) from the dataset of n instances:
-	print "...Calculating Dissimilarity Matrix..."
+	print "Calculating Dissimilarity Matrix..."
 	mat = []
 	for i in dataset :
 		row = []
@@ -34,6 +23,7 @@ def dissimilarityMatrix(dataset,dist): # returns the : D(nxn) from the dataset o
 		mat.append(row)
 	mat=np.array(mat)
 	#print mat
+	print "...Done!"
 	return mat
 getdm = dissimilarityMatrix # alias
 
@@ -46,11 +36,10 @@ vmat = verifyMatrix #alias
 #------ MVFCMddV implementation-------
 def getInitialVectorOfMedoidsVector(D,K):
 	G=[]
-	vlist = []
 	for k in range(K):
 		g_k = []
 		for j in range(p):
-			#
+			vlist = []
 			randIndex = rd.randint(0,len(D[j])-1)
 			while (randIndex in vlist):
 				randIndex = rd.randint(0,len(D[j])-1)
@@ -60,6 +49,7 @@ def getInitialVectorOfMedoidsVector(D,K):
 			g_k_j = randIndex # G <- instance's index
 			g_k.append(g_k_j)
 		G.append(g_k)
+	print "G INIT"
 	return np.array(G)
 vmv = getInitialVectorOfMedoidsVector #alias
 
@@ -70,6 +60,7 @@ def getInitialVectorOfRelevanceWeightVectors(K):
 		for h in range(p):
 			l_k.append(1.)
 		L.append(l_k)
+	print "L INIT"
 	return np.array(L)
 gbgl = getInitialVectorOfRelevanceWeightVectors #alias
 
@@ -93,6 +84,7 @@ def getInitialVectorOfMembershipDegreeVectors(E,K): #eq. (6)
 			u_i_k = (( argSum ** (1./(m-1.)) ) + 1e-25  ) ** -1.
 			u_i.append(u_i_k)
 		U.append(u_i)
+	print "U INIT"
 	return np.array(U)
 getu = getInitialVectorOfMembershipDegreeVectors #alias
 
@@ -185,27 +177,49 @@ def argminIndex(list):
 			index = i
 	return index
 
+#--------------------------------
+#datasets 
+xfac,yfac = DATA["fac"]
+xfou,yfou = DATA["fou"]
+xkar,ykar = DATA["kar"]
+xsmall,ysmall = DATA["small"]
+xsmall2,ysmall2 = DATA["small2"]
+xsmall3,ysmall3 = DATA["small3"]
+toy = np.array([[1,0,0],[0,1,0],[0,0,0]]) #toy dataset, just for test and validation
+print "Multiple Features Data Set loaded..."
 
 #------ MVFCMddV init
 #def MVFCMddV_init():
 #INIT---- t=0
 E = xsmall
 E2 = xsmall2
+E3 = xsmall3
 K = 3 #10
-m = 2 #1.6
+m = 1.6 
 p = 2 #3
+#e = 
+#T = 
 D1 = dissimilarityMatrix(E,dist)
 D2 = dissimilarityMatrix(E2,dist)
-D = np.array([D1,D2])
+D3 = dissimilarityMatrix(E3,dist)
+D = np.array([D1,D2,D3])
 G = getInitialVectorOfMedoidsVector(E,K)
 L = getInitialVectorOfRelevanceWeightVectors(K)
 U = getInitialVectorOfMembershipDegreeVectors(E,K)
-print "J t=0 %f"%(J(G,L,U,K))
+GINIT = G
+LINIT = L
+UINIT = U
+print "t=0: J = %f"%(J(G,L,U,K))
 #REPEAT---- t=1
-nG = step1(E,K,G,L,U)
-nL = step2(E,K,nG,L,U)
-nU = step3(E,K,nG,nL,U)
-print "J t=1 %f"%(J(nG,nL,nU,K))
+times = 20
+for t in range(times):
+	nG = step1(E,K,G,L,U)
+	nL = step2(E,K,nG,L,U)
+	nU = step3(E,K,nG,nL,U)
+	print "t=%d: J = %f"%(t+1,J(nG,nL,nU,K))
+	G = nG
+	L = nL
+	U = nU
 
 
 #--------------------------------------
