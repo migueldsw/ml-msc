@@ -61,7 +61,7 @@ DATA = {
     'mor': (mor,target),
     'pix': (pix,target),
     'zer': (zer,target),
-    'small': (small_mor,small_target)
+    'small': (small_mor,small_target),
     'small2': (small_fou,small_target)
     }
 
