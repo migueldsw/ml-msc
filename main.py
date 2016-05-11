@@ -60,7 +60,7 @@ vmv = getInitialVectorOfMedoidsVector #alias
 def getInitialVectorOfRelevanceWeightVectors(K):
 	L = []
 	for k in range(K):
-		L_k = [1]
+		L_k = [1.]
 		L.append(L_k)
 	return np.array(L)
 gbgl = getInitialVectorOfRelevanceWeightVectors #alias
@@ -99,7 +99,8 @@ def J(G,L,U,K): #eq. (1) -> objective function
 			val += (U[i][k] ** m) * summ
 	return val
 
-def step1(E,K,G,L,U): #search for the best medoid vectors -> returns G (updates cluster medoids vector)
+def step1(E,K,G,L,U): #search for the best medoid vectors -> returns G (updates cluster medoids vector) 
+	#Eq. (4)
 	nG=[] #new G -> G(t) updated
 	n = len(E)
 	for k in range(K):
@@ -112,6 +113,29 @@ def step1(E,K,G,L,U): #search for the best medoid vectors -> returns G (updates 
 		l = argminIndex(arglist)
 		nG.append([l])
 	return np.array(nG)
+
+def step2(E,K,G,L,U): #computes the vector of relevance weights => Eq. (5)
+	nL = []
+	n = len(D1)
+	for k in range(K):
+		l_k = []
+		for j in range(p):
+			prod = 1 
+			for h in range(p):
+				summ = 0
+				for i in range(n):
+					summ += ( (U[i][k]**m) * D1[i][G[k][h]] )
+				prod *= summ
+			numerator = prod
+			denominator = 0 
+			for i in range(n):
+				denominator += ( (U[i][k]**m) * D1[i][G[k][j]] )
+			l_k_j = (numerator ** (1./p))/denominator
+			l_k.append(l_k_j)
+		nL.append(l_k)
+	return np.array(nL)
+
+
 
 def Ut0(K,n,):
 	U = []
@@ -146,6 +170,7 @@ L = getInitialVectorOfRelevanceWeightVectors(K)
 U = getInitialVectorOfMembershipDegreeVectors(E,K)
 #REPEAT----
 nG = step1(E,K,G,L,U)
+nL = step2(E,K,G,L,U)
 
 
 
