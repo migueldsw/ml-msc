@@ -178,6 +178,15 @@ def argminIndex(list):
 			index = i
 	return index
 
+#time cost evaluation
+TIME = [] #[t_init,t_final]
+def startCrono():
+	TIME.append(dt.now())
+def getCrono(): # returns delta t in microseconds
+	TIME.append(dt.now())
+	deltat = TIME[1]-TIME[0]
+	return deltat.microseconds
+
 #--------------------------------
 #datasets 
 xfac,yfac = DATA["fac"]
@@ -192,6 +201,7 @@ print "Multiple Features Data Set loaded..."
 #------ MVFCMddV init
 #def MVFCMddV_init():
 #INIT---- t=0
+startCrono()
 E = xsmall
 E2 = xsmall2
 E3 = xsmall3
@@ -200,8 +210,6 @@ m = 1.6
 p = 2 #3
 #e = 
 #T = 
-#timeeval
-it = dt.now()
 D1 = dissimilarityMatrix(E,dist)
 D2 = dissimilarityMatrix(E2,dist)
 D3 = dissimilarityMatrix(E3,dist)
@@ -223,10 +231,9 @@ for t in range(times):
 	G = nG
 	L = nL
 	U = nU
-ft = dt.now()
-deltat = ft-it
-deltat_s = deltat.seconds
-print "done in %f s"%(deltatms)
+
+print "done in %.1f s"%(float(getCrono())/10**6)
+
 
 
 #--------------------------------------
