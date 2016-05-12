@@ -71,7 +71,7 @@ def getInitialVectorOfMembershipDegreeVectors(E,K): #eq. (6)
 	for i in range(n):
 		u_i = []
 		for k in range(K):
-			argSum = 0
+			summ = 0
 			for h in range(K):
 				numerator = 0
 				denominator = 0 
@@ -81,8 +81,8 @@ def getInitialVectorOfMembershipDegreeVectors(E,K): #eq. (6)
 				for j in range(p):
 #					denominator+= L[h][j] * dist(E[i],G[h][j])
 					denominator+= L[h][j] * D[j][i][G[h][j]]
-				argSum += ( numerator /(denominator + 1e-25 ))
-			u_i_k = (( argSum ** (1./(m-1.)) ) + 1e-25  ) ** -1.
+				summ += ( numerator /(denominator + 1e-25 )) ** (1./(m-1.))
+			u_i_k = (( summ  ) + 1e-25  ) ** -1.
 			u_i.append(u_i_k)
 		U.append(u_i)
 	print "U INIT"
@@ -146,7 +146,7 @@ def step3(E,K,G,L,U): #best fuzzy partition -> Eq. (6)
 	for i in range(n):
 		u_i = []
 		for k in range(K):
-			argSum = 0
+			summ = 0
 			for h in range(K):
 				numerator = 0
 				denominator = 0 
@@ -154,8 +154,8 @@ def step3(E,K,G,L,U): #best fuzzy partition -> Eq. (6)
 					numerator += L[k][j] * D[j][i][G[k][j]]
 				for j in range(p):
 					denominator+= L[h][j] * D[j][i][G[h][j]]
-				argSum += ( float(numerator) /(denominator + 1e-25 ))
-			u_i_k = (( argSum ** (1./(m-1.)) ) + 1e-25  ) ** -1.
+				summ += ( float(numerator) /(denominator + 1e-25 )) ** (1./(m-1.))
+			u_i_k = ( summ  + 1e-25  ) ** -1.
 			u_i.append(u_i_k)
 		nU.append(u_i)
 	return np.array(nU)
@@ -244,8 +244,8 @@ def checkdata():
 		datasetdetails(x,n)
 	print("----------------")
 
-
-
+for i in U:
+	print sum(i)
 
 
 
