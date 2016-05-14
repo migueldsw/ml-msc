@@ -194,8 +194,8 @@ def startCrono():
 	TIME.append(dt.now())
 def getCrono(): # returns delta t in microseconds
 	TIME.append(dt.now())
-	deltat = TIME[1]-TIME[0]
-	return deltat.microseconds
+	deltat = TIME[-1]-TIME[-2]
+	return deltat.seconds
 
 def isUok(U):
 	isok = True
@@ -226,25 +226,20 @@ startCrono()
 D1 = dissimilarityMatrix(E,dist)
 D2 = dissimilarityMatrix(E2,dist)
 D3 = dissimilarityMatrix(E3,dist)
-print "matrices calculated in %.1f s"%(float(getCrono())/10**6)
+print "matrices calculated in %d s"%(getCrono())
 
 def runMVFCMddV():
 	#INIT---- t=0
 	startCrono()
 	K = 3 #10
 	m = 1.6 
-	p = 3 #2 #3
+	p = 3 
 	e = 10 ** -10
 	T = 150
 	D = np.array([D1,D2,D3])
 	G = getInitialVectorOfMedoidsVector(D,K)
 	L = getInitialVectorOfRelevanceWeightVectors(D,K)
 	U = getInitialVectorOfMembershipDegreeVectors(m,D,K,G,L)
-	GINIT = G
-	LINIT = L
-	UINIT = U
-	fU=U
-	fG=G
 	u_t = J(m,D,K,G,L,U)
 	u_t_m1 = np.inf 
 	print "t=0: J(v) = %f"%(u_t)
@@ -265,7 +260,7 @@ def runMVFCMddV():
 			print "     |u_t - u_t-1| < e"
 			break
 
-	print "done in %.1f s"%(float(getCrono())/10**6)
+	print "done in %d s"%(getCrono())
 	#print "t=%d: J = %f"%(t+1,J(m,D,K,G,L,U))
 	verifyU(U)
 	return G,L,U
@@ -291,11 +286,23 @@ def verifyU(U):
 		print " FAIL U!!!!"
 
 
-print "RUNNING! "
+print "RUNNING MVFCMddV! "
 G,L,U = runMVFCMddV()
 print "END EXECUTION! "
 
+def clusters(U):
+	mapped = []
+	index = 0
+	for i in U:
+		mapped.append((index,argminIndex(i,[])))
+		index += 1
+	clusters = []
+	for k in range(len(U[0])):
+		clusters.append([])
+	for i in mapped:
+		clusters[i[-1]].append(i[0])
+	return clusters	
 
-
+C = clusters(U)
 
 
