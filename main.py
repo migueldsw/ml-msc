@@ -50,7 +50,7 @@ def getInitialVectorOfMedoidsVector(D,K):
 			g_k_j = randIndex # G <- instance's index
 			g_k.append(g_k_j)
 		G.append(g_k)
-	print "G INIT"
+	#print "G INIT"
 	return np.array(G)
 vmv = getInitialVectorOfMedoidsVector #alias
 
@@ -62,7 +62,7 @@ def getInitialVectorOfRelevanceWeightVectors(D,K):
 		for h in range(p):
 			l_k.append(1.)
 		L.append(l_k)
-	print "L INIT"
+	#print "L INIT"
 	return np.array(L)
 gbgl = getInitialVectorOfRelevanceWeightVectors #alias
 
@@ -87,7 +87,7 @@ def getInitialVectorOfMembershipDegreeVectors(m,D,K,G,L): #eq. (6)
 			u_i_k = (( summ  ) + 1e-25  ) ** -1.
 			u_i.append(u_i_k)
 		U.append(u_i)
-	print "U INIT"
+	#print "U INIT"
 	return np.array(U)
 getu = getInitialVectorOfMembershipDegreeVectors #alias
 
@@ -213,23 +213,29 @@ xsmall,ysmall = DATA["small"]
 xsmall2,ysmall2 = DATA["small2"]
 xsmall3,ysmall3 = DATA["small3"]
 toy = np.array([[1,0,0],[0,1,0],[0,0,0]]) #toy dataset, just for test and validation
+E = xsmall
+E2 = xsmall2
+E3 = xsmall3
+# E = xfac
+# E2 = xfou
+# E3 = xkar
 print "Multiple Features Data Set loaded..."
 
-#------ MVFCMddV init
+#------ Calculate Dissimilarity Matrices
+startCrono()
+D1 = dissimilarityMatrix(E,dist)
+D2 = dissimilarityMatrix(E2,dist)
+D3 = dissimilarityMatrix(E3,dist)
+print "matrices calculated in %.1f s"%(float(getCrono())/10**6)
+
 def runMVFCMddV():
 	#INIT---- t=0
 	startCrono()
-	E = xsmall
-	E2 = xsmall2
-	E3 = xsmall3
 	K = 3 #10
 	m = 1.6 
-	p = 2 #3
-	#e = 
-	#T = 
-	D1 = dissimilarityMatrix(E,dist)
-	D2 = dissimilarityMatrix(E2,dist)
-	D3 = dissimilarityMatrix(E3,dist)
+	p = 3 #2 #3
+	e = 10 ** -10
+	T = 150
 	D = np.array([D1,D2,D3])
 	G = getInitialVectorOfMedoidsVector(D,K)
 	L = getInitialVectorOfRelevanceWeightVectors(D,K)
@@ -239,20 +245,30 @@ def runMVFCMddV():
 	UINIT = U
 	fU=U
 	fG=G
-	print "t=0: J = %f"%(J(m,D,K,G,L,U))
-	#REPEAT---- t=1
-	times = 20
-	for t in range(times):
+	u_t = J(m,D,K,G,L,U)
+	u_t_m1 = np.inf 
+	print "t=0: J(v) = %f"%(u_t)
+	#REPEAT... UNTIL t>T
+	for t in range(T):
 		nG = step1(m,D,K,G,L,U)
 		nL = step2(m,D,K,nG,L,U)
 		nU = step3(m,D,K,nG,nL,U)
-		print "t=%d: J = %f"%(t+1,J(m,D,K,nG,nL,nU))
+		u_t_m1 = u_t
+		u_t = J(m,D,K,nG,nL,nU)
+		udif = u_t - u_t_m1
+		print "t=%d: J(v) = %f | dif= %f"%(t+1,u_t,udif)
 		G = nG
 		L = nL
 		U = nU
+		# UNTIL (OR) |u_t - u_t-1| < e 
+		if (abs(udif)<e):
+			print "     |u_t - u_t-1| < e"
+			break
 
 	print "done in %.1f s"%(float(getCrono())/10**6)
+	#print "t=%d: J = %f"%(t+1,J(m,D,K,G,L,U))
 	verifyU(U)
+	return G,L,U
 
 
 
@@ -275,7 +291,9 @@ def verifyU(U):
 		print " FAIL U!!!!"
 
 
-runMVFCMddV()
+print "RUNNING! "
+G,L,U = runMVFCMddV()
+print "END EXECUTION! "
 
 
 
