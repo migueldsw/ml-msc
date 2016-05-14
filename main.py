@@ -113,7 +113,7 @@ def step1(E,K,G,L,U): #search for the best medoid vectors -> returns G (updates 
 				for i in range (n):
 					summ += ((U[i][k] ** m) * (D[j][i][h]))
 				arglist.append(summ)
-			l = argminIndex(arglist)
+			l = argminIndex(arglist,g_k)
 			g_k_j = l
 			g_k.append(g_k_j)
 		nG.append(g_k)
@@ -170,13 +170,17 @@ def Ut0(K,n,):
 		U.append(u_i)
 	return np.array(U)
 
-def argminIndex(list):
+def argminIndex(list,exclude):
 	argmin = min(list)
-	index = []
+	argmax = max(list)
+	indexList = []
 	for i in range(len(list)):
 		if (list[i] == argmin) :
-			index = i
-	return index
+			if i in exclude:
+				list[i] = argmax
+				i = argminIndex(list,exclude)	
+			indexList.append(i) 
+	return indexList[0]
 
 #time cost evaluation
 TIME = [] #[t_init,t_final]
