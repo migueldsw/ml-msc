@@ -39,8 +39,8 @@ def getInitialVectorOfMedoidsVector(D,K):
 	G=[]
 	for k in range(K):
 		g_k = []
+		vlist = []
 		for j in range(p):
-			vlist = []
 			randIndex = rd.randint(0,len(D[j])-1)
 			while (randIndex in vlist):
 				randIndex = rd.randint(0,len(D[j])-1)
@@ -187,6 +187,13 @@ def getCrono(): # returns delta t in microseconds
 	deltat = TIME[1]-TIME[0]
 	return deltat.microseconds
 
+def isUok(U):
+	isok = True
+	for i in U:
+		if (sum(i)>1.00001):
+			isok = False
+	return isok
+
 #--------------------------------
 #datasets 
 xfac,yfac = DATA["fac"]
@@ -220,6 +227,8 @@ U = getInitialVectorOfMembershipDegreeVectors(E,K)
 GINIT = G
 LINIT = L
 UINIT = U
+fU=U
+fG=G
 print "t=0: J = %f"%(J(G,L,U,K))
 #REPEAT---- t=1
 times = 20
@@ -244,8 +253,17 @@ def checkdata():
 		datasetdetails(x,n)
 	print("----------------")
 
-for i in U:
-	print sum(i)
+if (isUok(U)):
+	print "U OK! "
+else :
+	print fU 
+	print U
+	print fG
+	print G
+	print " FAIL U!!!!"
+
+
+
 
 
 
