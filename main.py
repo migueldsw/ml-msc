@@ -37,6 +37,7 @@ vmat = verifyMatrix #alias
 #------ MVFCMddV implementation-------
 def getInitialVectorOfMedoidsVector(D,K):
 	G=[]
+	p = len(D)
 	for k in range(K):
 		g_k = []
 		vlist = []
@@ -45,7 +46,6 @@ def getInitialVectorOfMedoidsVector(D,K):
 			while (randIndex in vlist):
 				randIndex = rd.randint(0,len(D[j])-1)
 			vlist.append(randIndex)
-			#print randIndex, yfac[randIndex]
 #>>			g_k = E[randIndex] #G <- instance
 			g_k_j = randIndex # G <- instance's index
 			g_k.append(g_k_j)
@@ -54,8 +54,9 @@ def getInitialVectorOfMedoidsVector(D,K):
 	return np.array(G)
 vmv = getInitialVectorOfMedoidsVector #alias
 
-def getInitialVectorOfRelevanceWeightVectors(K):
+def getInitialVectorOfRelevanceWeightVectors(D,K):
 	L = []
+	p = len(D)
 	for k in range(K):
 		l_k = []
 		for h in range(p):
@@ -65,9 +66,10 @@ def getInitialVectorOfRelevanceWeightVectors(K):
 	return np.array(L)
 gbgl = getInitialVectorOfRelevanceWeightVectors #alias
 
-def getInitialVectorOfMembershipDegreeVectors(E,K): #eq. (6)
+def getInitialVectorOfMembershipDegreeVectors(m,D,K,G,L): #eq. (6)
 	U = []
-	n = len(E)
+	n = len(D[0])
+	p = len(D)
 	for i in range(n):
 		u_i = []
 		for k in range(K):
@@ -89,8 +91,9 @@ def getInitialVectorOfMembershipDegreeVectors(E,K): #eq. (6)
 	return np.array(U)
 getu = getInitialVectorOfMembershipDegreeVectors #alias
 
-def J(G,L,U,K): #eq. (1) -> objective function
-	n = len(U)
+def J(m,D,K,G,L,U): #eq. (1) -> objective function
+	n = len(D[0])
+	p = len(D)
 	val = 0
 	for k in range(K):
 		for i in range(n):
@@ -100,10 +103,11 @@ def J(G,L,U,K): #eq. (1) -> objective function
 			val += (U[i][k] ** m) * summ
 	return val
 
-def step1(E,K,G,L,U): #search for the best medoid vectors -> returns G (updates cluster medoids vector) 
+def step1(m,D,K,G,L,U): #search for the best medoid vectors -> returns G (updates cluster medoids vector) 
 	#Eq. (4)
 	nG=[] #new G -> G(t) updated
-	n = len(E)
+	n = len(D[0])
+	p = len(D)
 	for k in range(K):
 		g_k = []
 		for j in range(p):
@@ -119,9 +123,10 @@ def step1(E,K,G,L,U): #search for the best medoid vectors -> returns G (updates 
 		nG.append(g_k)
 	return np.array(nG)
 
-def step2(E,K,G,L,U): #computes the vector of relevance weights => Eq. (5)
+def step2(m,D,K,G,L,U): #computes the vector of relevance weights => Eq. (5)
 	nL = []
-	n = len(D1)
+	n = len(D[0])
+	p = len(D)
 	for k in range(K):
 		l_k = []
 		for j in range(p):
@@ -140,9 +145,10 @@ def step2(E,K,G,L,U): #computes the vector of relevance weights => Eq. (5)
 		nL.append(l_k)
 	return np.array(nL)
 
-def step3(E,K,G,L,U): #best fuzzy partition -> Eq. (6) 
+def step3(m,D,K,G,L,U): #best fuzzy partition -> Eq. (6) 
 	nU = []
-	n = len(D1)
+	n = len(D[0])
+	p = len(D)
 	for i in range(n):
 		u_i = []
 		for k in range(K):
@@ -210,42 +216,43 @@ toy = np.array([[1,0,0],[0,1,0],[0,0,0]]) #toy dataset, just for test and valida
 print "Multiple Features Data Set loaded..."
 
 #------ MVFCMddV init
-#def MVFCMddV_init():
-#INIT---- t=0
-startCrono()
-E = xsmall
-E2 = xsmall2
-E3 = xsmall3
-K = 3 #10
-m = 1.6 
-p = 2 #3
-#e = 
-#T = 
-D1 = dissimilarityMatrix(E,dist)
-D2 = dissimilarityMatrix(E2,dist)
-D3 = dissimilarityMatrix(E3,dist)
-D = np.array([D1,D2,D3])
-G = getInitialVectorOfMedoidsVector(E,K)
-L = getInitialVectorOfRelevanceWeightVectors(K)
-U = getInitialVectorOfMembershipDegreeVectors(E,K)
-GINIT = G
-LINIT = L
-UINIT = U
-fU=U
-fG=G
-print "t=0: J = %f"%(J(G,L,U,K))
-#REPEAT---- t=1
-times = 20
-for t in range(times):
-	nG = step1(E,K,G,L,U)
-	nL = step2(E,K,nG,L,U)
-	nU = step3(E,K,nG,nL,U)
-	print "t=%d: J = %f"%(t+1,J(nG,nL,nU,K))
-	G = nG
-	L = nL
-	U = nU
+def runMVFCMddV():
+	#INIT---- t=0
+	startCrono()
+	E = xsmall
+	E2 = xsmall2
+	E3 = xsmall3
+	K = 3 #10
+	m = 1.6 
+	p = 2 #3
+	#e = 
+	#T = 
+	D1 = dissimilarityMatrix(E,dist)
+	D2 = dissimilarityMatrix(E2,dist)
+	D3 = dissimilarityMatrix(E3,dist)
+	D = np.array([D1,D2,D3])
+	G = getInitialVectorOfMedoidsVector(D,K)
+	L = getInitialVectorOfRelevanceWeightVectors(D,K)
+	U = getInitialVectorOfMembershipDegreeVectors(m,D,K,G,L)
+	GINIT = G
+	LINIT = L
+	UINIT = U
+	fU=U
+	fG=G
+	print "t=0: J = %f"%(J(m,D,K,G,L,U))
+	#REPEAT---- t=1
+	times = 20
+	for t in range(times):
+		nG = step1(m,D,K,G,L,U)
+		nL = step2(m,D,K,nG,L,U)
+		nU = step3(m,D,K,nG,nL,U)
+		print "t=%d: J = %f"%(t+1,J(m,D,K,nG,nL,nU))
+		G = nG
+		L = nL
+		U = nU
 
-print "done in %.1f s"%(float(getCrono())/10**6)
+	print "done in %.1f s"%(float(getCrono())/10**6)
+	verifyU(U)
 
 
 
@@ -257,16 +264,18 @@ def checkdata():
 		datasetdetails(x,n)
 	print("----------------")
 
-if (isUok(U)):
-	print "U OK! "
-else :
-	print fU 
-	print U
-	print fG
-	print G
-	print " FAIL U!!!!"
+def verifyU(U):
+	if (isUok(U)):
+		print "U OK! "
+	else :
+		print fU 
+		print U
+		print fG
+		print G
+		print " FAIL U!!!!"
 
 
+runMVFCMddV()
 
 
 
