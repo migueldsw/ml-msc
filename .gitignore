@@ -60,3 +60,8 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+#Reports and out-files
+out/
+report/
+reports/

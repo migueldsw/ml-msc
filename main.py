@@ -279,15 +279,12 @@ def verifyU(U):
 	if (isUok(U)):
 		print "U OK! "
 	else :
-		print fU 
-		print U
-		print fG
-		print G
 		print " FAIL U!!!!"
 
 
 print "RUNNING MVFCMddV! "
-G,L,U = runMVFCMddV()
+for i in range(10):
+	G,L,U = runMVFCMddV()
 print "END EXECUTION! "
 
 def clusters(U):
