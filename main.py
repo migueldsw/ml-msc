@@ -4,6 +4,7 @@ from scipy.spatial import distance as dist
 from datasets import DATA
 import random as rd 
 from datetime import datetime as dt
+from report import *
 
 dist = sc.spatial.distance.euclidean #set global function 'dist' as the euclidean distance, from scipy implementation
 
@@ -188,6 +189,18 @@ def argminIndex(list,exclude):
 			indexList.append(i) 
 	return indexList[0]
 
+def argmaxIndex(list,exclude):
+	argmin = min(list)
+	argmax = max(list)
+	indexList = []
+	for i in range(len(list)):
+		if (list[i] == argmin) :
+			if i in exclude:
+				list[i] = argmax
+				i = argminIndex(list,exclude)	
+			indexList.append(i) 
+	return indexList[0]
+
 #time cost evaluation
 TIME = [] #[t_init,t_final]
 def startCrono():
@@ -242,6 +255,8 @@ def runMVFCMddV():
 	U = getInitialVectorOfMembershipDegreeVectors(m,D,K,G,L)
 	u_t = J(m,D,K,G,L,U)
 	u_t_m1 = np.inf 
+	JValues = []
+	JValues.append(u_t)
 	print "t=0: J(v) = %f"%(u_t)
 	#REPEAT... UNTIL t>T
 	for t in range(T):
@@ -250,6 +265,7 @@ def runMVFCMddV():
 		nU = step3(m,D,K,nG,nL,U)
 		u_t_m1 = u_t
 		u_t = J(m,D,K,nG,nL,nU)
+		JValues.append(u_t)
 		udif = u_t - u_t_m1
 		print "t=%d: J(v) = %f | dif= %f"%(t+1,u_t,udif)
 		G = nG
@@ -263,7 +279,8 @@ def runMVFCMddV():
 	print "done in %d s"%(getCrono())
 	#print "t=%d: J = %f"%(t+1,J(m,D,K,G,L,U))
 	verifyU(U)
-	return G,L,U
+
+	return G,L,U,JValues
 
 
 
@@ -281,17 +298,25 @@ def verifyU(U):
 	else :
 		print " FAIL U!!!!"
 
+def getHardPartitionList(U):
+	instances = []
+	for i in U:
+		instances.append(argmaxIndex(i,[]))
+	return instances
 
 print "RUNNING MVFCMddV! "
 for i in range(10):
-	G,L,U = runMVFCMddV()
+	G,L,U,JList = runMVFCMddV()
+	#plotting...
+	plotDots(getHardPartitionList(U),'out/out','hard')
+	plotValuesLine(JList,'out/out','J')
 print "END EXECUTION! "
 
 def clusters(U):
 	mapped = []
 	index = 0
 	for i in U:
-		mapped.append((index,argminIndex(i,[])))
+		mapped.append((index,argmaxIndex(i,[])))
 		index += 1
 	clusters = []
 	for k in range(len(U[0])):
@@ -301,5 +326,5 @@ def clusters(U):
 	return clusters	
 
 C = clusters(U)
-
+hp = getHardPartitionList(U)
 

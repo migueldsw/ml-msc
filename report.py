@@ -11,6 +11,7 @@ def checkDir(directory):
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
+#graph plotting
 def plotLine(x,y,path,fileName):
 	line, = plt.plot(x, y, '-', linewidth=2, color='blue', label='J')
 	
@@ -62,6 +63,13 @@ def plotDots(y,path,fileName):
 	plt.clf()
 	plt.close()
 
+#file writing
+def writeFile(fileName,lines):
+	f = open(fileName,'a')
+	for l in lines:
+		f.write(l + "\n")
+	f.close()
+
 x = [0,1,2,3,4,5]
 y = [95.858585,57.22,55.5,54.3,54.0,51.82]
 y1 = [1,2,3,1,2,1,4,2,3,1,1,1,3,4,1,1,6,2,1,1,7,8,9,0,7]
@@ -69,3 +77,5 @@ y1 = [1,2,3,1,2,1,4,2,3,1,1,1,3,4,1,1,6,2,1,1,7,8,9,0,7]
 plotLine(x,y,"out","outtest")
 plotValuesLine(y,"out","outtestValues")
 plotDots(y1,"out","classes")
+
+writeFile('out/results.txt',['lorem','ipsum','dolor','sit','amet'])
