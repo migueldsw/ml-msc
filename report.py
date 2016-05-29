@@ -2,6 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
+
 #pretty printing
 np.set_printoptions(suppress=True)
 np.set_printoptions(precision=3)
@@ -38,7 +42,8 @@ def plotLine(x,y,path,fileName):
 
 	#stub
 	for i,j in zip(x,y):
-		plt.annotate(str(j),xy=(i,j))
+		#plt.annotate(str(j),xy=(i,j))
+		plt.annotate(str("%.3f"%j),xy=(i,j),xytext=(5,5), textcoords='offset points')
 	#end stub
 
 
@@ -65,17 +70,38 @@ def plotDots(y,path,fileName):
 
 #file writing
 def writeFile(fileName,lines):
+	f = open(fileName,'w')
+	for l in lines:
+		f.write(l + "\n")
+	f.close()
+
+def appendFile(fileName,lines):
 	f = open(fileName,'a')
 	for l in lines:
 		f.write(l + "\n")
 	f.close()
 
+def strArray(l):
+	return ''.join(str(i)+' ' for i in l)
+
+def strMat(m):
+	out = []
+	for i in m:
+		out.append(strArray(i))
+	return out
+
+def writeMat(fileName,m):
+	writeFile(fileName,strMat(m))
+
+
+
+
 x = [0,1,2,3,4,5]
 y = [95.858585,57.22,55.5,54.3,54.0,51.82]
 y1 = [1,2,3,1,2,1,4,2,3,1,1,1,3,4,1,1,6,2,1,1,7,8,9,0,7]
 
-plotLine(x,y,"out","outtest")
-plotValuesLine(y,"out","outtestValues")
-plotDots(y1,"out","classes")
+#plotLine(x,y,"out","outtest")
+#plotValuesLine(y,"out","outtestValues")
+#plotDots(y1,"out","classes")
 
-writeFile('out/results.txt',['lorem','ipsum','dolor','sit','amet'])
+#writeFile('out/results.txt',['lorem','ipsum','dolor','sit','amet'])

@@ -257,7 +257,9 @@ def runMVFCMddV():
 	u_t_m1 = np.inf 
 	JValues = []
 	JValues.append(u_t)
+	reportLines = []
 	print "t=0: J(v) = %f"%(u_t)
+	reportLines.append("t=0: J(v) = %f"%(u_t))
 	#REPEAT... UNTIL t>T
 	for t in range(T):
 		nG = step1(m,D,K,G,L,U)
@@ -268,19 +270,24 @@ def runMVFCMddV():
 		JValues.append(u_t)
 		udif = u_t - u_t_m1
 		print "t=%d: J(v) = %f | dif= %f"%(t+1,u_t,udif)
+		reportLines.append("t=%d: J(v) = %f | dif= %f"%(t+1,u_t,udif))
 		G = nG
 		L = nL
 		U = nU
 		# UNTIL (OR) |u_t - u_t-1| < e 
 		if (abs(udif)<e):
+			reportLines.append("     |u_t - u_t-1| < e")
 			print "     |u_t - u_t-1| < e"
 			break
 
-	print "done in %d s"%(getCrono())
+	doneInStr = "done in %d s"%(getCrono())
+	print doneInStr
+	reportLines.append(doneInStr)
+
 	#print "t=%d: J = %f"%(t+1,J(m,D,K,G,L,U))
 	verifyU(U)
 
-	return G,L,U,JValues
+	return G,L,U,JValues,reportLines
 
 
 
@@ -306,10 +313,16 @@ def getHardPartitionList(U):
 
 print "RUNNING MVFCMddV! "
 for i in range(10):
-	G,L,U,JList = runMVFCMddV()
+	path = 'out/exec_%d/'%i
+	G,L,U,JList, reportLines = runMVFCMddV()
 	#plotting...
-	plotDots(getHardPartitionList(U),'out/out','hard')
-	plotValuesLine(JList,'out/out','J')
+	plotDots(getHardPartitionList(U),path,'hard')
+	plotValuesLine(JList,path,'J')
+	writeFile(path+'exec_results.txt',reportLines)
+	writeMat(path+'U',U)
+	writeMat(path+'L',L)
+	writeMat(path+'G',G)
+
 print "END EXECUTION! "
 
 def clusters(U):
