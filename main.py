@@ -311,6 +311,13 @@ def getHardPartitionList(U):
 		instances.append(argmaxIndex(i,[]))
 	return instances
 
+def getBestExec():
+	l =  np.genfromtxt('out/all_execs_J_values')
+	bestExec = argmaxIndex(l,[])
+	msg = "The best execution was %d"%(bestExec)
+	print msg
+	appendFile('out/all_execs_J_values',['-------------------',msg])
+
 print "RUNNING MVFCMddV! "
 for i in range(10):
 	path = 'out/exec_%d/'%i
@@ -322,8 +329,10 @@ for i in range(10):
 	writeMat(path+'U',U)
 	writeMat(path+'L',L)
 	writeMat(path+'G',G)
+	appendFile('out/all_execs_J_values',[str(JList[-1])])
 
 print "END EXECUTION! "
+getBestExec()
 
 def clusters(U):
 	mapped = []
