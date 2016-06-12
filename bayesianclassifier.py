@@ -82,9 +82,23 @@ def getXc(X,Y,c): #subset of X -> class 'c'
 			Xc.append(X[index])
 	return np.array(Xc)
 
+class BC:
+	def __init__(self):
+		self.X = []
+		self.y = []
+		self.classes = []
 
-ecov = estCov(f2)
-cov = np.cov(f2)
+	def fit(self,X,y):
+		self.X = X
+		self.y = y
+		self.classes = np.unique(self.y)
+
+	def predict(self, x):
+		probs = []
+		for c in self.classes:
+			probs.append(posteriori(self.X,self.y,c,x))
+		return self.classes[np.argmax(probs)]
+
 
 
 
