@@ -226,12 +226,12 @@ xsmall,ysmall = DATA["small"]
 xsmall2,ysmall2 = DATA["small2"]
 xsmall3,ysmall3 = DATA["small3"]
 toy = np.array([[1,0,0],[0,1,0],[0,0,0]]) #toy dataset, just for test and validation
-E = xsmall
-E2 = xsmall2
-E3 = xsmall3
-# E = xfac
-# E2 = xfou
-# E3 = xkar
+# E = xsmall
+# E2 = xsmall2
+# E3 = xsmall3
+E = xfac
+E2 = xfou
+E3 = xkar
 print "Multiple Features Data Set loaded..."
 
 #------ Calculate Dissimilarity Matrices
@@ -244,7 +244,7 @@ print "matrices calculated in %d s"%(getCrono())
 def runMVFCMddV():
 	#INIT---- t=0
 	startCrono()
-	K = 3 #10
+	K = 10 #3 #10
 	m = 1.6 
 	p = 3 
 	e = 10 ** -10
@@ -319,7 +319,8 @@ def getBestExec():
 	appendFile('out/all_execs_J_values',['-------------------',msg])
 
 print "RUNNING MVFCMddV! "
-for i in range(10):
+os.system('rm -r out')
+for i in range(3):
 	path = 'out/exec_%d/'%i
 	G,L,U,JList, reportLines = runMVFCMddV()
 	#plotting...
