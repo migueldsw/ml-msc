@@ -318,22 +318,6 @@ def getBestExec():
 	print msg
 	appendFile('out/all_execs_J_values',['-------------------',msg])
 
-print "RUNNING MVFCMddV! "
-os.system('rm -r out')
-for i in range(3):
-	path = 'out/exec_%d/'%i
-	G,L,U,JList, reportLines = runMVFCMddV()
-	#plotting...
-	plotDots(getHardPartitionList(U),path,'hard')
-	plotValuesLine(JList,path,'J')
-	writeFile(path+'exec_results.txt',reportLines)
-	writeMat(path+'U',U)
-	writeMat(path+'L',L)
-	writeMat(path+'G',G)
-	appendFile('out/all_execs_J_values',[str(JList[-1])])
-
-print "END EXECUTION! "
-getBestExec()
 
 def clusters(U):
 	mapped = []
@@ -348,6 +332,25 @@ def clusters(U):
 		clusters[i[-1]].append(i[0])
 	return clusters	
 
-C = clusters(U)
-hp = getHardPartitionList(U)
+print "RUNNING MVFCMddV! "
+os.system('rm -r out')
+for i in range(10): #EXECUTIONS 
+	path = 'out/exec_%d/'%i
+	G,L,U,JList, reportLines = runMVFCMddV()
+	#plotting...
+	plotDots(getHardPartitionList(U),path,'hard')
+	plotValuesLine(JList,path,'J')
+	writeFile(path+'exec_results.txt',reportLines)
+	writeMat(path+'U',U)
+	writeMat(path+'L',L)
+	writeMat(path+'G',G)
+	appendFile('out/all_execs_J_values',[str(JList[-1])])
+
+print "END EXECUTION! "
+getBestExec()
+
+
+
+#C = clusters(U)
+#hp = getHardPartitionList(U)
 

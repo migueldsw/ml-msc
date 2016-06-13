@@ -101,8 +101,84 @@ def evaluate(trainX,trainY,testX,testY,classifier):
 	print ("the error was %d in %d tests")%(errors,len(testY))
 	return errors
 
+def fitBCs(trainIndexes, datasets):
+	classifiers = []
+	for (x,y) in datasets:
+		cl = BC()
+		data, target = listToData(trainIndexes, x, y)
+		cl.fit(data, target)
+		classifiers.append(cl)
+	return classifiers  
+
+def fitSVMs(trainIndexes, datasets):
+	classifiers = []
+	for (x,y) in datasets:
+		cl = SVC(C=1.0, cache_size=200, kernel='rbf')
+		data, target = listToData(trainIndexes, x, y)
+		cl.fit(data, target)
+		classifiers.append(cl)
+	return classifiers 
+
+def fitMLPs(trainIndexes, datasets):
+	classifiers = []
+	for (x,y) in datasets:
+		cl =  MLPClassifier(algorithm='l-bfgs', alpha=1e-4, hidden_layer_sizes=(76, 30), random_state=1, momentum=0.8)
+		data, target = listToData(trainIndexes, x, y)
+		cl.fit(data, target)
+		classifiers.append(cl)
+	return classifiers 
+
+def votesForInstance(testIndex, classifierList,datasets):
+	votes = []
+	for i in range(len(classifierList)):
+		x,y = datasets[i]
+		cl = classifierList[i]
+		instance, target = listToData([testIndex],x,y)
+		votes.append(cl.predict(instance[0])[0])
+	return votes
+
+
+
 #k10foldCrossValidation(x1,y1)
 #cls = BC()
 #cls = SVC(C=1.0, cache_size=200, kernel='rbf')
-cls = MLPClassifier(algorithm='l-bfgs', alpha=1e-4, hidden_layer_sizes=(76, 30), random_state=1, momentum=0.8)
-evaluate(x1,y1,x1,y1,cls)
+#cls = MLPClassifier(algorithm='l-bfgs', alpha=1e-4, hidden_layer_sizes=(76, 30), random_state=1, momentum=0.8)
+#evaluate(x5,y5,x5,y5,cls)
+
+def evaluateMultiple(trainIndexes,testIndexes,datasetsList,fitClassifiersFunction):
+	cll = fitClassifiersFunction(trainIndexes,datasetsList)
+	error = 0
+	for ind in testIndexes:
+		votes = votesForInstance(ind,cll,datasetsList)
+		print "x ID: %d(CLASS: %d)  VOTES: %s  APURED VOTE: %d" %(ind,classOfIndex(ind,200),votes,apureVotes(votes))
+		selectedClass = apureVotes(votes)
+		correctClass = classOfIndex(ind,200)
+		if (correctClass != selectedClass):
+			print "ERROR!"
+			error += 1
+	print "--------------------\n  ERROR WAS %d"%error
+	return error
+
+#evaluateMultiple([1,2,3,4,5,200,201,203,204],[9,210,11,220])
+
+def k10foldCrossValidation(fitClassifiersFunction):
+	#create 10 folds
+	skf = StratifiedKFold(y1, n_folds = 10, shuffle = True)
+	numFold = 1
+	totalError = 0
+	datasetsList=[ (x1,y1), (x2,y2), (x5,y5)]
+	for trainIndexes, testIndexes in skf:
+		np.random.shuffle(trainIndexes)
+		np.random.shuffle(testIndexes)
+		print "FOLD %d --------"%(numFold)
+		numFold += 1
+		#
+		#clfList = fitBCs(trainIndexes,datasetsList)
+		totalError += evaluateMultiple(trainIndexes,testIndexes,datasetsList,fitClassifiersFunction)
+	print("-------------------------")
+	print ("the TOTAL error was %d")%totalError
+	return totalError
+
+BCError = k10foldCrossValidation(fitBCs)
+SVMError = k10foldCrossValidation(fitSVMs)
+MLPError = k10foldCrossValidation(fitMLPs)
