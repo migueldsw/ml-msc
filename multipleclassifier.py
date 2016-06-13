@@ -166,7 +166,7 @@ def k10foldCrossValidation(fitClassifiersFunction):
 	skf = StratifiedKFold(y1, n_folds = 10, shuffle = True)
 	numFold = 1
 	totalError = 0
-	datasetsList=[ (x1,y1), (x2,y2), (x5,y5)]
+	datasetsList=[ (x1,y1), (x2,y2), (x5,y5)] ##'fou','kar','zer'
 	for trainIndexes, testIndexes in skf:
 		np.random.shuffle(trainIndexes)
 		np.random.shuffle(testIndexes)
@@ -179,6 +179,53 @@ def k10foldCrossValidation(fitClassifiersFunction):
 	print ("the TOTAL error was %d")%totalError
 	return totalError
 
-BCError = k10foldCrossValidation(fitBCs)
-SVMError = k10foldCrossValidation(fitSVMs)
-MLPError = k10foldCrossValidation(fitMLPs)
+#RUN 
+# BCError = k10foldCrossValidation(fitBCs)
+# SVMError = k10foldCrossValidation(fitSVMs)
+# MLPError = k10foldCrossValidation(fitMLPs)
+# #success rates:
+# print "success rates (BC,SVM,MLP)" 
+# print (2000-BCError)/2000., (2000-SVMError)/2000., (2000-MLPError)/2000.
+# #>>0.906 0.8925 0.9145
+
+##>>> print BCError, SVMError, MLPError
+##>>188 215 171
+
+
+def evaluateMultipleAllClassifiers(trainIndexes,testIndexes,datasetsList):
+	cllBC = fitBCs(trainIndexes,datasetsList)
+	cllSVM = fitSVMs(trainIndexes,datasetsList)
+	cllMLP = fitMLPs(trainIndexes,datasetsList)
+	error = 0
+	for ind in testIndexes:
+		votesBC = votesForInstance(ind,cllBC,datasetsList)
+		votesSVM = votesForInstance(ind,cllSVM,datasetsList)
+		votesMLP = votesForInstance(ind,cllMLP,datasetsList)
+		selectedClass = apureVotes([apureVotes(votesBC),apureVotes(votesSVM),apureVotes(votesMLP)])
+		correctClass = classOfIndex(ind,200)
+		print "x ID: %d(CLASS: %d)  VOTES(BC,SVM,MLP): %s  APURED VOTE: %d" %(ind,correctClass,[votesBC,votesSVM,votesMLP],selectedClass)
+		if (correctClass != selectedClass):
+			print "ERROR!"
+			error += 1
+	print "--------------------\n  ERROR WAS %d"%error
+	return error
+def k10foldCrossValidationAllClassifiers():
+	#create 10 folds
+	skf = StratifiedKFold(y1, n_folds = 10, shuffle = True)
+	numFold = 1
+	totalError = 0
+	datasetsList=[ (x1,y1), (x2,y2), (x5,y5)] ##'fou','kar','zer'
+	for trainIndexes, testIndexes in skf:
+		np.random.shuffle(trainIndexes)
+		np.random.shuffle(testIndexes)
+		print "FOLD %d --------"%(numFold)
+		numFold += 1
+		#
+		#clfList = fitBCs(trainIndexes,datasetsList)
+		totalError += evaluateMultipleAllClassifiers(trainIndexes,testIndexes,datasetsList)
+	print("-------------------------")
+	print ("the TOTAL error was %d")%totalError
+	return totalError
+
+finalError = k10foldCrossValidationAllClassifiers()
+print "FINAL ERROR WAS: %d"%finalError
