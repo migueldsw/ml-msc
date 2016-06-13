@@ -122,7 +122,7 @@ class BC:
 		for c in self.classes:
 			prob = posteriori(self.y,c,x,self.estCovMatrices,self.invEstCovMatrices,self.muList)
 			probs.append(prob)
-		return self.classes[np.argmax(probs)]
+		return [self.classes[np.argmax(probs)]]
 
 
 def eval (X,Y):
