@@ -10,18 +10,29 @@ from sklearn.cross_validation import StratifiedKFold
 from bayesianclassifier import BC
 from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
+from report import *
+from datetime import datetime as dt
 import warnings
 warnings.filterwarnings("ignore")
 
 
 DATASETNAMES = ['fac','fou','kar','mor','pix','zer']
-x0,y0 = DATA[DATASETNAMES[0]]
+#x0,y0 = DATA[DATASETNAMES[0]]
 x1,y1 = DATA[DATASETNAMES[1]]
 x2,y2 = DATA[DATASETNAMES[2]]
-x3,y3 = DATA[DATASETNAMES[3]]
-x4,y4 = DATA[DATASETNAMES[4]]
+#x3,y3 = DATA[DATASETNAMES[3]]
+#x4,y4 = DATA[DATASETNAMES[4]]
 x5,y5 = DATA[DATASETNAMES[5]]
-s1,s2 = DATA['small2']
+#s1,s2 = DATA['small2']
+
+#time cost evaluation
+TIME = [] #[t_init,t_final]
+def startCrono():
+	TIME.append(dt.now())
+def getCrono(): # returns delta t in microseconds
+	TIME.append(dt.now())
+	deltat = TIME[-1]-TIME[-2]
+	return deltat.seconds
 
 def apureVotes(li):
 	return ctr(li).most_common(1)[0][0]
@@ -179,19 +190,6 @@ def k10foldCrossValidation(fitClassifiersFunction):
 	print ("the TOTAL error was %d")%totalError
 	return totalError
 
-#RUN 
-# BCError = k10foldCrossValidation(fitBCs)
-# SVMError = k10foldCrossValidation(fitSVMs)
-# MLPError = k10foldCrossValidation(fitMLPs)
-# #success rates:
-# print "success rates (BC,SVM,MLP)" 
-# print (2000-BCError)/2000., (2000-SVMError)/2000., (2000-MLPError)/2000.
-# #>>0.906 0.8925 0.9145
-
-##>>> print BCError, SVMError, MLPError
-##>>188 215 171
-
-
 def evaluateMultipleAllClassifiers(trainIndexes,testIndexes,datasetsList):
 	cllBC = fitBCs(trainIndexes,datasetsList)
 	cllSVM = fitSVMs(trainIndexes,datasetsList)
@@ -227,5 +225,74 @@ def k10foldCrossValidationAllClassifiers():
 	print ("the TOTAL error was %d")%totalError
 	return totalError
 
-finalError = k10foldCrossValidationAllClassifiers()
-print "FINAL ERROR WAS: %d"%finalError
+def errorToSuccessRate(err):
+	return (2000-err)/2000.
+
+###########
+###RUN
+
+def RUN(execNum):
+	print "######### EXEC.: %d #########"%execNum
+	startCrono()
+	print("Stratified 10 Fold Cross Validation for Bayesian Classifier") 
+	BCError = k10foldCrossValidation(fitBCs)
+	print "BC ERROR WAS: %d"%BCError
+	timeBC = getCrono()
+	print "DONE! in %d seconds"%timeBC
+
+	startCrono()
+	print("Stratified 10 Fold Cross Validation for SVM") 
+	SVMError = k10foldCrossValidation(fitSVMs)
+	print "SVM ERROR WAS: %d"%SVMError
+	timeSVM = getCrono()
+	print "DONE! in %d seconds"%timeSVM
+
+
+	startCrono()
+	print("Stratified 10 Fold Cross Validation for MLP") 
+	MLPError = k10foldCrossValidation(fitMLPs)
+	print "MLP ERROR WAS: %d"%MLPError
+	timeMLP = getCrono()
+	print "DONE! in %d seconds"%timeMLP
+
+
+	#success rates:
+	print "success rates (BC,SVM,MLP)" 
+	print (2000-BCError)/2000., (2000-SVMError)/2000., (2000-MLPError)/2000.
+
+	# #>>0.906 0.8925 0.9145
+	##>>> print BCError, SVMError, MLPError
+	##>>188 215 171
+
+	startCrono()
+	print("Stratified 10 Fold Cross Validation for MLP") 
+	ALLError = k10foldCrossValidationAllClassifiers()
+	print "FINAL ERROR WAS: %d"%ALLError
+	timeALL = getCrono()
+	print "DONE! in %d seconds"%timeALL
+	#>>FINAL ERROR WAS: 157
+
+	print "------------"
+	print "ALL TIMES(secs) (%s) SUM= %d secs" %([timeBC,timeSVM,timeMLP,timeALL],sum([timeBC,timeSVM,timeMLP,timeALL]))
+	print "------------"
+	print "Success Rates (BC,SVM,MLP,ALL): "
+	print errorToSuccessRate(BCError)
+	print errorToSuccessRate(SVMError)
+	print errorToSuccessRate(MLPError)
+	print errorToSuccessRate(ALLError)
+	appendFile('outQ2/SucRate_BC',[str(errorToSuccessRate(BCError))])
+	appendFile('outQ2/SucRate_SVM',[str(errorToSuccessRate(SVMError))])
+	appendFile('outQ2/SucRate_MLP',[str(errorToSuccessRate(MLPError))])
+	appendFile('outQ2/SucRate_ALL',[str(errorToSuccessRate(ALLError))])
+
+os.system('rm -r outQ2')
+os.system('mkdir outQ2')
+###RUN TESTS
+print"Q2 RUN !"
+
+for e in range(2): #NUM EXECUTIONS
+	RUN(e+1)
+
+print "-------------END EXEC."
+
+#>> python multipleclassifier.py > Q2_EXEC_LOG.txt 2> Q2_stderr.txt
