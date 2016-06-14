@@ -334,7 +334,7 @@ def clusters(U):
 
 print "RUNNING MVFCMddV! "
 os.system('rm -r out')
-for i in range(10): #EXECUTIONS 
+for i in range(100): #EXECUTIONS 
 	path = 'out/exec_%d/'%i
 	G,L,U,JList, reportLines = runMVFCMddV()
 	#plotting...
